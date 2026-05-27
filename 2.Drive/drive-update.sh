@@ -32,6 +32,12 @@ for cmd in rclone rsync; do
   fi
 done
 
+if [[ "${RCLONE_REMOTE}" == *:* ]]; then
+  RCLONE_REMOTE_SPEC="${RCLONE_REMOTE}"
+else
+  RCLONE_REMOTE_SPEC="${RCLONE_REMOTE}:"
+fi
+
 MOUNT_DIR="$(mktemp -d)"
 RSYNC_SOURCE="${MOUNT_DIR}/${RCLONE_REMOTE_SUBDIR%/}/"
 RSYNC_TARGET="${LOCAL_SYNC_DIR%/}/"
@@ -55,8 +61,8 @@ cleanup() {
 }
 trap cleanup EXIT
 
-echo "==> 掛載 remote ${RCLONE_REMOTE} 至 ${MOUNT_DIR}"
-rclone mount "${RCLONE_REMOTE}" "${MOUNT_DIR}" --vfs-cache-mode writes &
+echo "==> 掛載 remote ${RCLONE_REMOTE_SPEC} 至 ${MOUNT_DIR}"
+rclone mount "${RCLONE_REMOTE_SPEC}" "${MOUNT_DIR}" --vfs-cache-mode writes &
 RCLONE_PID=$!
 
 for _ in {1..30}; do

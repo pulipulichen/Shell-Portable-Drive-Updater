@@ -43,8 +43,10 @@ fi
 
 if [[ "${RCLONE_REMOTE}" == *:* ]]; then
   RCLONE_REMOTE_NAME="${RCLONE_REMOTE%%:*}"
+  RCLONE_REMOTE_SPEC="${RCLONE_REMOTE}"
 else
   RCLONE_REMOTE_NAME="${RCLONE_REMOTE}"
+  RCLONE_REMOTE_SPEC="${RCLONE_REMOTE}:"
 fi
 
 echo
@@ -61,7 +63,7 @@ if ! rclone listremotes | sed 's/:$//' | rg -Fx -- "${RCLONE_REMOTE_NAME}" >/dev
   fi
 fi
 
-echo "rclone remote 檢查通過：${RCLONE_REMOTE}"
+echo "rclone remote 檢查通過：${RCLONE_REMOTE_NAME}（掛載格式：${RCLONE_REMOTE_SPEC}）"
 echo "設定檢查通過。"
 echo "你可以繼續執行 ../2.Drive/drive-update.sh"
 
