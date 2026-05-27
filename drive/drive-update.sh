@@ -33,10 +33,28 @@ for cmd in rclone rsync; do
 done
 
 if [[ "${RCLONE_REMOTE}" == *:* ]]; then
+  RCLONE_REMOTE_NAME="${RCLONE_REMOTE%%:*}"
   RCLONE_REMOTE_SPEC="${RCLONE_REMOTE}"
 else
+  RCLONE_REMOTE_NAME="${RCLONE_REMOTE}"
   RCLONE_REMOTE_SPEC="${RCLONE_REMOTE}:"
 fi
+
+echo
+echo "==> 檢查 rclone remote"
+if ! rclone listremotes | sed 's/:$//' | rg -Fx -- "${RCLONE_REMOTE_NAME}" >/dev/null 2>&1; then
+  echo "找不到 rclone remote: ${RCLONE_REMOTE_NAME}"
+  echo "現在開啟 rclone config，請依指示完成設定。"
+  rclone config
+
+  if ! rclone listremotes | sed 's/:$//' | rg -Fx -- "${RCLONE_REMOTE_NAME}" >/dev/null 2>&1; then
+    echo "錯誤：設定後仍找不到 remote ${RCLONE_REMOTE_NAME}"
+    echo "請確認 .env 的 RCLONE_REMOTE 是否正確。"
+    exit 1
+  fi
+fi
+
+echo "rclone remote 檢查通過：${RCLONE_REMOTE_NAME}（掛載格式：${RCLONE_REMOTE_SPEC}）"
 
 MOUNT_DIR="$(mktemp -d)"
 RSYNC_SOURCE="${MOUNT_DIR}/${RCLONE_REMOTE_SUBDIR%/}/"
